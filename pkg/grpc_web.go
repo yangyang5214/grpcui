@@ -15,7 +15,7 @@ func NewGrpcWeb(curl *GrpcCurl) *GrpcWeb {
 	pwd, _ := os.Getwd()
 	return &GrpcWeb{
 		curl: curl,
-		pwd:  pwd,
+		pwd:  pwd + "/pkg/static",
 	}
 }
 
@@ -28,7 +28,7 @@ func (s *GrpcWeb) handleMethod(writer http.ResponseWriter, request *http.Request
 }
 
 func (s *GrpcWeb) faviconIco(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, path.Join(s.pwd, "./static/favicon.png"))
+	http.ServeFile(w, r, path.Join(s.pwd, "./favicon.png"))
 }
 
 func (s *GrpcWeb) Handler(writer http.ResponseWriter, request *http.Request) {
