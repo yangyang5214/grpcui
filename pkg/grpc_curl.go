@@ -2,8 +2,12 @@ package pkg
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"google.golang.org/grpc"
+	"sort"
 	"strings"
 )
 
@@ -28,8 +32,21 @@ func NewGrpcCurl(ctx context.Context, addr string) (*GrpcCurl, error) {
 	}, nil
 }
 
-func (g *GrpcCurl) ListMethods() ([]string, error) {
-	return nil, nil
+func (g *GrpcCurl) ListMethods(serviceName string) ([]string, error) {
+	dsc, err := g.FindSymbol(serviceName)
+	if err != nil {
+		return nil, err
+	}
+	if sd, ok := dsc.(*desc.ServiceDescriptor); !ok {
+		return nil, errors.New(fmt.Sprintf("not found service name %s", serviceName))
+	} else {
+		methods := make([]string, 0, len(sd.GetMethods()))
+		for _, method := range sd.GetMethods() {
+			methods = append(methods, method.GetFullyQualifiedName())
+		}
+		sort.Strings(methods)
+		return methods, nil
+	}
 }
 
 func (g *GrpcCurl) ListServices() ([]string, error) {
@@ -48,4 +65,16 @@ func (g *GrpcCurl) ListServices() ([]string, error) {
 		result = append(result, service)
 	}
 	return result, nil
+}
+
+func (g *GrpcCurl) FindSymbol(fullyQualifiedName string) (desc.Descriptor, error) {
+	file, err := g.client.FileContainingSymbol(fullyQualifiedName)
+	if err != nil {
+		return nil, err
+	}
+	d := file.FindSymbol(fullyQualifiedName)
+	if d == nil {
+		return nil, errors.New(fmt.Sprintf("could not find symbol: %s", fullyQualifiedName))
+	}
+	return d, nil
 }
