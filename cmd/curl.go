@@ -10,6 +10,8 @@ import (
 	"github.com/yangyang5214/grpcui/pkg"
 )
 
+var addr string
+
 // curlCmd represents the curl command
 var curlCmd = &cobra.Command{
 	Use:   "curl",
@@ -17,7 +19,7 @@ var curlCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		grpcCurl, err := pkg.NewGrpcCurl(ctx, "10.0.81.250:9000")
+		grpcCurl, err := pkg.NewGrpcCurl(ctx, addr)
 		if err != nil {
 			log.Errorf("init grpc curl error: %v", err)
 			return
@@ -44,5 +46,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// curlCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().StringVarP(&addr, "addr", "a", "10.0.81.250:9000", "grpc server address")
 }

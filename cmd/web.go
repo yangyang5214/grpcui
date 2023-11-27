@@ -4,7 +4,11 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/yangyang5214/grpcui/pkg"
+	"net/http"
 )
 
 // webCmd represents the web command
@@ -13,7 +17,20 @@ var webCmd = &cobra.Command{
 	Short: "web",
 	Long:  `grpc-ui`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		ctx := context.Background()
+		grpcCurl, err := pkg.NewGrpcCurl(ctx, addr)
+		if err != nil {
+			log.Errorf("init grpc curl error: %v", err)
+			return
+		}
+		web := pkg.NewGrpcWeb(grpcCurl)
+		http.HandleFunc("/", web.Handler)
+		log.Info("start web server http://127.0.0.1:8548")
+		err = http.ListenAndServe(":8548", nil)
+		if err != nil {
+			log.Errorf("listen error: %v", err)
+			return
+		}
 	},
 }
 
