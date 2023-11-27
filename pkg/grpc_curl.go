@@ -2,10 +2,12 @@ package pkg
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"sort"
 	"strings"
@@ -16,6 +18,8 @@ type GrpcCurl struct {
 	ctx  context.Context
 
 	client *grpcreflect.Client
+
+	methodMap map[string]*desc.MethodDescriptor
 }
 
 func NewGrpcCurl(ctx context.Context, addr string) (*GrpcCurl, error) {
@@ -26,33 +30,68 @@ func NewGrpcCurl(ctx context.Context, addr string) (*GrpcCurl, error) {
 
 	refClient := grpcreflect.NewClientAuto(ctx, conn)
 	return &GrpcCurl{
-		addr:   addr,
-		ctx:    ctx,
-		client: refClient,
+		addr:      addr,
+		ctx:       ctx,
+		client:    refClient,
+		methodMap: make(map[string]*desc.MethodDescriptor),
 	}, nil
 }
 
-func (g *GrpcCurl) ListMethods(serviceName string) ([]string, error) {
+func (g *GrpcCurl) ListMethods(serviceName string) ([]*MethodWrap, error) {
 	dsc, err := g.FindSymbol(serviceName)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	if sd, ok := dsc.(*desc.ServiceDescriptor); !ok {
+	sd, ok := dsc.(*desc.ServiceDescriptor)
+	if !ok {
 		return nil, errors.New(fmt.Sprintf("not found service name %s", serviceName))
-	} else {
-		methods := make([]string, 0, len(sd.GetMethods()))
-		for _, method := range sd.GetMethods() {
-			methods = append(methods, method.GetFullyQualifiedName())
-		}
-		sort.Strings(methods)
-		return methods, nil
 	}
+	result := make([]*MethodWrap, 0, len(sd.GetMethods()))
+	for _, method := range sd.GetMethods() {
+		methodName := method.GetFullyQualifiedName()
+		g.methodMap[methodName] = method
+		result = append(result, &MethodWrap{
+			method:  methodName,
+			payload: g.genPayload(method),
+		})
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].method > result[j].method
+	})
+	return result, nil
+}
+
+func (g *GrpcCurl) GetMethodDescByName(methodName string) (*desc.MethodDescriptor, error) {
+	if len(g.methodMap) == 0 { // init current service methods¬
+		arr := strings.Split(methodName, ".")
+		_, err := g.ListMethods(strings.Join(arr[0:len(arr)-1], "."))
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+	r, ok := g.methodMap[methodName]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("method not found: %s", methodName))
+	}
+	return r, nil
+}
+
+func (g *GrpcCurl) genPayload(method *desc.MethodDescriptor) string {
+	payload := make(map[string]any)
+	for _, field := range method.GetInputType().GetFields() {
+		payload[field.GetName()] = DefaultFieldValue(field)
+	}
+	bytes, err := json.Marshal(&payload)
+	if err != nil {
+		log.Errorf("json.Marshal error: %v", err)
+	}
+	return string(bytes)
 }
 
 func (g *GrpcCurl) ListServices() ([]string, error) {
 	services, err := g.client.ListServices()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var result []string
 	for _, service := range services {
@@ -70,7 +109,7 @@ func (g *GrpcCurl) ListServices() ([]string, error) {
 func (g *GrpcCurl) FindSymbol(fullyQualifiedName string) (desc.Descriptor, error) {
 	file, err := g.client.FileContainingSymbol(fullyQualifiedName)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	d := file.FindSymbol(fullyQualifiedName)
 	if d == nil {

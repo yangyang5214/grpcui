@@ -23,10 +23,23 @@ func TestListMethods(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, service := range services {
+		t.Logf("service is %s", service)
 		methods, mErr := gcurl.ListMethods(service)
 		if mErr != nil {
 			t.Fatal(mErr)
 		}
-		t.Log(methods)
+		for _, method := range methods {
+			t.Log(method.method)
+		}
 	}
+}
+
+func TestMethodPayload(t *testing.T) {
+	methodName := "tophant.parser.api.TaskResultService.List"
+	method, err := gcurl.GetMethodDescByName(methodName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := gcurl.genPayload(method)
+	t.Log(payload)
 }
