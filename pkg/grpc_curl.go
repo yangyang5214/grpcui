@@ -20,6 +20,7 @@ type GrpcCurl struct {
 	client *grpcreflect.Client
 
 	methodMap map[string]*desc.MethodDescriptor
+	conn      *grpc.ClientConn
 }
 
 func NewGrpcCurl(ctx context.Context, addr string) (*GrpcCurl, error) {
@@ -30,11 +31,16 @@ func NewGrpcCurl(ctx context.Context, addr string) (*GrpcCurl, error) {
 
 	refClient := grpcreflect.NewClientAuto(ctx, conn)
 	return &GrpcCurl{
+		conn:      conn,
 		addr:      addr,
 		ctx:       ctx,
 		client:    refClient,
 		methodMap: make(map[string]*desc.MethodDescriptor),
 	}, nil
+}
+
+func (g *GrpcCurl) GetConn() *grpc.ClientConn {
+	return g.conn
 }
 
 func (g *GrpcCurl) ListMethods(serviceName string) ([]*MethodWrap, error) {
