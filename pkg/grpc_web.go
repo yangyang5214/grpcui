@@ -103,3 +103,33 @@ func (s *GrpcWeb) ListMethod(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 }
+
+func (s *GrpcWeb) AllMethods(writer http.ResponseWriter, request *http.Request) {
+	services, err := s.curl.ListServices()
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var methodWraps []*MethodWrap
+	for _, service := range services {
+		methods, err := s.curl.ListMethods(service)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		methodWraps = append(methodWraps, &MethodWrap{
+			Service: service,
+			Methods: methods,
+		})
+	}
+
+	r := &AllMethod{
+		Addr:    s.curl.GetAddr(),
+		Methods: methodWraps,
+	}
+	err = json.NewEncoder(writer).Encode(r)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

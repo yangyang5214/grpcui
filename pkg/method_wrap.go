@@ -10,8 +10,13 @@ import (
 )
 
 type MethodWrap struct {
-	method  string
-	payload string //json payload
+	Service string   `json:"service,omitempty"`
+	Methods []string `json:"methods,omitempty"`
+}
+
+type AllMethod struct {
+	Addr    string        `json:"addr,omitempty"`
+	Methods []*MethodWrap `json:"methods,omitempty"`
 }
 
 func DefaultFieldValue(field *desc.FieldDescriptor) any {
