@@ -24,7 +24,13 @@ func (s *GrpcWeb) ListServices(writer http.ResponseWriter, request *http.Request
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(writer).Encode(services)
+
+	r := map[string]any{
+		"services": services,
+		"server":   s.curl.GetAddr(),
+	}
+
+	err = json.NewEncoder(writer).Encode(r)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return

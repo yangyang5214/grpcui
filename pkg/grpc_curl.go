@@ -43,6 +43,10 @@ func (g *GrpcCurl) GetConn() *grpc.ClientConn {
 	return g.conn
 }
 
+func (g *GrpcCurl) GetAddr() string {
+	return g.addr
+}
+
 func (g *GrpcCurl) ListMethods(serviceName string) ([]string, error) {
 	dsc, err := g.FindSymbol(serviceName)
 	if err != nil {
