@@ -24,7 +24,10 @@ var webCmd = &cobra.Command{
 			return
 		}
 		web := pkg.NewGrpcWeb(grpcCurl)
-		http.HandleFunc("/", web.Handler)
+		http.HandleFunc("/services", web.ListServices)
+		http.HandleFunc("/service/methods", web.ListMethod)
+		http.HandleFunc("/method/fake_body", web.FakeBody)
+		http.HandleFunc("/send", web.Send)
 		log.Info("start web server http://127.0.0.1:8548")
 		err = http.ListenAndServe(":8548", nil)
 		if err != nil {

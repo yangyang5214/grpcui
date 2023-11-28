@@ -29,7 +29,7 @@ func TestListMethods(t *testing.T) {
 			t.Fatal(mErr)
 		}
 		for _, method := range methods {
-			t.Log(method.method)
+			t.Log(method)
 		}
 	}
 }

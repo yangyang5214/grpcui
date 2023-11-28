@@ -43,7 +43,7 @@ func (g *GrpcCurl) GetConn() *grpc.ClientConn {
 	return g.conn
 }
 
-func (g *GrpcCurl) ListMethods(serviceName string) ([]*MethodWrap, error) {
+func (g *GrpcCurl) ListMethods(serviceName string) ([]string, error) {
 	dsc, err := g.FindSymbol(serviceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -52,17 +52,14 @@ func (g *GrpcCurl) ListMethods(serviceName string) ([]*MethodWrap, error) {
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("not found service name %s", serviceName))
 	}
-	result := make([]*MethodWrap, 0, len(sd.GetMethods()))
+	result := make([]string, 0, len(sd.GetMethods()))
 	for _, method := range sd.GetMethods() {
 		methodName := method.GetFullyQualifiedName()
 		g.methodMap[methodName] = method
-		result = append(result, &MethodWrap{
-			method:  methodName,
-			payload: g.genPayload(method),
-		})
+		result = append(result, methodName)
 	}
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].method > result[j].method
+		return result[i] > result[j]
 	})
 	return result, nil
 }
