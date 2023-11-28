@@ -1,24 +1,38 @@
 .App {
-    text-align: center;
     display: flex;
-    width: 100%;
 }
 
-.drag {
-    grid-row: 1;
-    position: relative;
-}
-
-
-.Left, .Send, .Right {
+.Left {
     flex: 3;
+    margin: 30px;
+}
+
+.Send {
+    flex: 4;
+    margin: 30px;
+}
+
+.Right {
+    flex: 4;
+    margin: 30px;
+}
+
+
+.separator {
     width: 100%;
+    height: 1px;
+    background-color: #ccc;
+    margin: 10px 0;
 }
 
 .App-logo {
     height: 40vmin;
     pointer-events: none;
 }
+
+.methodName {
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
     .App-logo {
@@ -48,4 +62,24 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+
+div {
+    border: 1px;
+    solid-color: red;
+}
+
+
+.api-container {
+
+}
+
+.method-container {
+    margin-left: 20px;
+    padding: 10px;
+}
+
+.method {
+    padding: 5px;
 }

@@ -5,11 +5,15 @@ package cmd
 
 import (
 	"context"
+	"embed"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yangyang5214/grpcui/pkg"
 	"net/http"
 )
+
+//go:embed build/*
+var content embed.FS
 
 // webCmd represents the web command
 var webCmd = &cobra.Command{
@@ -24,11 +28,15 @@ var webCmd = &cobra.Command{
 			return
 		}
 		web := pkg.NewGrpcWeb(grpcCurl)
+
+		http.Handle("/", http.FileServer(http.Dir("cmd/build"))) //todo  use content
+
 		http.HandleFunc("/services", web.ListServices)
 		http.HandleFunc("/service/methods", web.ListMethod)
 		http.HandleFunc("/all/methods", web.AllMethods)
 		http.HandleFunc("/method/fake_body", web.FakeBody)
 		http.HandleFunc("/send", web.Send)
+
 		log.Info("start web server http://127.0.0.1:8548")
 		err = http.ListenAndServe(":8548", nil)
 		if err != nil {
