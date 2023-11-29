@@ -28,10 +28,11 @@ export async function GetPayload(method: string) {
 }
 
 export async function Send(method: string, payload: string) {
-    return await axios.post<string>(apiEndPoint + '/send', {
+    const json = JSON.stringify({
         "payload": payload,
         "method": method,
-    }, {
+    });
+    return await axios.post<string>(apiEndPoint + '/send', json, {
         headers: {
             'Content-Type': 'application/json'
         }

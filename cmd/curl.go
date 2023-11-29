@@ -46,5 +46,4 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	rootCmd.Flags().StringVarP(&addr, "addr", "a", "10.0.81.250:9000", "grpc server address")
 }

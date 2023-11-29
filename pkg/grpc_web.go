@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"github.com/jhump/protoreflect/dynamic"
+	"io"
 	"net/http"
 )
 
@@ -37,12 +38,37 @@ func (s *GrpcWeb) ListServices(writer http.ResponseWriter, request *http.Request
 	}
 }
 
+type SendRequest struct {
+	Payload string `json:"payload,omitempty"`
+	Method  string `json:"method,omitempty"`
+}
+
 func (s *GrpcWeb) Send(writer http.ResponseWriter, request *http.Request) {
-	payload := request.PostFormValue("payload")
-	method := request.PostFormValue("method")
+	headerContentType := request.Header.Get("Content-Type")
+	if headerContentType != "application/json" {
+		http.Error(writer, "Content Type is not application/json", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var sendRequest *SendRequest
+	err = json.Unmarshal(body, &sendRequest)
+	if err != nil {
+		http.Error(writer, "Error decoding JSON", http.StatusBadRequest)
+		return
+	}
+
+	payload := sendRequest.Payload
+	method := sendRequest.Method
+
 	md, err := s.curl.GetMethodDescByName(method)
 	if err != nil {
-		http.Error(writer, "method param required", http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -51,17 +77,17 @@ func (s *GrpcWeb) Send(writer http.ResponseWriter, request *http.Request) {
 	dMsg := dynamic.NewMessage(md.GetInputType())
 	err = JsonToMessage(jsonData, dMsg)
 	if err != nil {
-		http.Error(writer, "method param required", http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	resp, err := s.client.send(request.Context(), md, dMsg)
 	if err != nil {
-		http.Error(writer, "method param required", http.StatusBadRequest)
+		http.Error(writer, "send rpc error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	_, err = writer.Write([]byte(resp))
 	if err != nil {
-		http.Error(writer, "method param required", http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 }

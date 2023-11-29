@@ -22,6 +22,7 @@ var webCmd = &cobra.Command{
 	Short: "web",
 	Long:  `grpc-ui`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Infof("listen rpc server %v", addr)
 		ctx := context.Background()
 		grpcCurl, err := pkg.NewGrpcCurl(ctx, addr)
 		if err != nil {
@@ -47,8 +48,8 @@ var webCmd = &cobra.Command{
 		log.Info("start web server http://127.0.0.1:8548")
 
 		server := &http.Server{
-			Addr: ":8548",
-			//Handler: allowCORS(r),
+			Addr:    ":8548",
+			Handler: allowCORS(r),
 		}
 
 		err = server.ListenAndServe()
@@ -75,14 +76,5 @@ func allowCORS(next http.Handler) http.Handler {
 
 func init() {
 	rootCmd.AddCommand(webCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// webCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// webCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	webCmd.Flags().StringVarP(&addr, "addr", "a", "10.0.81.250:9000", "grpc server address")
 }
