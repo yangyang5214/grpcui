@@ -19,7 +19,8 @@ function App() {
 
     const [selectMethod, setSelectMethod] = useState<string>("");
 
-    let respBody: string = ""
+    const [respBody, setRespBody] = useState<string>("");
+
 
     useEffect(() => {
         // Fetch initial data when the component mounts
@@ -48,9 +49,11 @@ function App() {
     };
 
     async function sendHttp() {
-        console.log("do send ...")
-        const resp = await Send(selectMethod, payload)
-        respBody = resp.data
+        await Send(selectMethod, payload).then(resp => {
+            setRespBody(resp.data)
+        }).catch(err => {
+            setRespBody(err.response.data)
+        })
     }
 
 

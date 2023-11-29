@@ -1,8 +1,8 @@
 // @ts-ignore
 import axios from "axios";
 
-// const apiEndPoint = "http://localhost:8548"
-const apiEndPoint = ""
+const apiEndPoint = "http://localhost:8548"
+// const apiEndPoint = ""
 
 
 interface AllMethodResponse {
