@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yangyang5214/grpcui/pkg"
+	"io/fs"
 	"net/http"
 )
 
@@ -29,7 +30,12 @@ var webCmd = &cobra.Command{
 		}
 		web := pkg.NewGrpcWeb(grpcCurl)
 
-		http.Handle("/", http.FileServer(http.Dir("cmd/build"))) //todo  use content
+		resultContent, err := fs.Sub(content, "build")
+		if err != nil {
+			log.Errorf("fs .sub error: %v", err)
+			return
+		}
+		http.Handle("/", http.FileServer(http.FS(resultContent)))
 
 		http.HandleFunc("/services", web.ListServices)
 		http.HandleFunc("/service/methods", web.ListMethod)
