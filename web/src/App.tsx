@@ -50,7 +50,6 @@ function App() {
     async function sendHttp() {
         console.log("do send ...")
         const resp = await Send(selectMethod, payload)
-        // respBody = jsonPrettify(resp.data)
         respBody = resp.data
     }
 

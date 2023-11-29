@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"embed"
-	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yangyang5214/grpcui/pkg"
@@ -36,7 +35,7 @@ var webCmd = &cobra.Command{
 			log.Errorf("fs .sub error: %v", err)
 			return
 		}
-		r := mux.NewRouter()
+		r := http.DefaultServeMux
 
 		r.Handle("/", http.FileServer(http.FS(resultContent)))
 		r.HandleFunc("/services", web.ListServices)
@@ -48,8 +47,8 @@ var webCmd = &cobra.Command{
 		log.Info("start web server http://127.0.0.1:8548")
 
 		server := &http.Server{
-			Addr:    ":8548",
-			Handler: allowCORS(r),
+			Addr: ":8548",
+			//Handler: allowCORS(r),
 		}
 
 		err = server.ListenAndServe()
@@ -63,7 +62,7 @@ var webCmd = &cobra.Command{
 func allowCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		//w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		//w.Header().Set("Access-Control-Allow-Methods", "*")
 		//w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
