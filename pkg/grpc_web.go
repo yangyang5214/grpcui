@@ -76,9 +76,12 @@ func (s *GrpcWeb) FakeBody(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	payload := s.curl.genPayload(md)
-	_, err = writer.Write([]byte(payload))
+	r := map[string]any{
+		"payload": payload,
+	}
+	err = json.NewEncoder(writer).Encode(r)
 	if err != nil {
-		http.Error(writer, "service param required", http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

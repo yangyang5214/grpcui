@@ -1,15 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
-import axios from "axios";
+import {GetAllMethods, GetPayload, Send} from "./Api";
 
-
-interface ApiResponse {
-    methods: {
-        service: string;
-        methods: string[];
-    }[];
-    addr: string;
-}
 
 interface Api {
     service: string;
@@ -22,15 +14,17 @@ function App() {
     const [apis, setApis] = useState<Api[]>();
     const [addr, setAddr] = useState("");
 
-    const [selectMethod, setSelectMethod] = useState("");
+    const [payload, setPayload] = useState<string>("");
 
-    let respBody = ""
+    const [selectMethod, setSelectMethod] = useState<string>("");
+
+    let respBody: string = ""
 
     useEffect(() => {
         // Fetch initial data when the component mounts
         const fetchInitialData = async () => {
             try {
-                const resp = await axios.get<ApiResponse>('/all/methods');
+                const resp = await GetAllMethods();
                 setApis(resp.data.methods);
                 setAddr(resp.data.addr);
             } catch (error) {
@@ -44,11 +38,30 @@ function App() {
     }, []); // Empty dependency array ensures the effect runs once when the component mounts
 
 
-    const handleMethodClick = (method: string) => {
+    const handleMethodClick = async (method: string) => {
         // Handle the click event for the method
         console.log(`Method clicked: ${method}`);
         setSelectMethod(method)
+        console.log(`selectMethod is: `, selectMethod)
+        await getPayload()
     };
+
+    async function sendHttp() {
+        console.log("do send ...")
+        const resp = await Send(selectMethod, payload)
+        respBody = resp.data
+    }
+
+
+    async function getPayload() {
+        if ("" === selectMethod) {
+            return
+        }
+        const resp = await GetPayload(selectMethod)
+        setPayload(resp.data.payload)
+        console.log(`payload is`, payload)
+    }
+
 
     const apiItems = apis?.map(api => (
         <div key={api.service} className="api-container">
@@ -63,12 +76,6 @@ function App() {
         </div>
     ));
 
-
-    function sendHttp() {
-        console.log("do send ...")
-        respBody = ""
-    }
-
     return (
         <div className="App">
             <div className={"Left"}>
@@ -81,7 +88,7 @@ function App() {
                     <button onClick={sendHttp}> Send</button>
                 </div>
                 <div className="payload">
-
+                    {payload}
                 </div>
             </div>
 
