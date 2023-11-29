@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import {GetAllMethods, GetPayload, Send} from "./Api";
+import {JsonView} from "./ui/json-view";
 
 
 interface Api {
@@ -49,6 +50,7 @@ function App() {
     async function sendHttp() {
         console.log("do send ...")
         const resp = await Send(selectMethod, payload)
+        // respBody = jsonPrettify(resp.data)
         respBody = resp.data
     }
 
@@ -88,7 +90,7 @@ function App() {
                     <button onClick={sendHttp}> Send</button>
                 </div>
                 <div className="payload">
-                    {payload}
+                    <JsonView initialDoc={payload}/>
                 </div>
             </div>
 
