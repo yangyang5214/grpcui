@@ -3,17 +3,17 @@
 }
 
 .Left {
-    flex: 3;
+    width: 25%;
     margin: 30px;
 }
 
 .Send {
-    flex: 4;
+    width: 30%;
     margin: 30px;
 }
 
 .Right {
-    flex: 4;
+    width: 25%;
     margin: 30px;
 }
 
@@ -33,6 +33,14 @@
 .methodName {
 }
 
+.addr {
+
+}
+
+.send {
+    margin: 10px;
+    padding: 2px;
+}
 
 @media (prefers-reduced-motion: no-preference) {
     .App-logo {

@@ -20,6 +20,7 @@ function App() {
     const [selectMethod, setSelectMethod] = useState<string>("");
 
     const [respBody, setRespBody] = useState<string>("");
+    const [respCode, setRespCode] = useState<String>("");
 
 
     useEffect(() => {
@@ -39,21 +40,31 @@ function App() {
         });
     }, []); // Empty dependency array ensures the effect runs once when the component mounts
 
+    function clear() {
+        setRespBody("")
+        setRespCode("")
+    }
 
     const handleMethodClick = async (method: string) => {
         // Handle the click event for the method
         console.log(`Method clicked: ${method}`);
         setSelectMethod(method)
-        setRespBody("") // clear
+
+        clear()
+
         console.log(`selectMethod is: `, selectMethod)
         await getPayload()
     };
 
     async function sendHttp() {
+        clear()
         await Send(selectMethod, payload).then(resp => {
             setRespBody(resp.data)
+            setRespCode(resp.status + " " + resp.statusText)
         }).catch(err => {
-            setRespBody(err.response.data)
+            let resp = err.response
+            setRespBody(resp.data)
+            setRespCode(resp.status + " " + resp.statusText)
         })
     }
 
@@ -72,11 +83,13 @@ function App() {
         <div key={api.service} className="api-container">
             {api.service}
             <div className="method-container">
-                {api.methods.map(method => (
-                    <div key={method} className="method" onClick={() => handleMethodClick(method)}>
-                        {method}
+                {api.methods.map(method => {
+                    const parts = method.split('.');
+                    const methodName = parts[parts.length - 1];
+                    return <div key={method} className="method" onClick={() => handleMethodClick(method)}>
+                        {methodName}
                     </div>
-                ))}
+                })}
             </div>
         </div>
     ));
@@ -89,8 +102,9 @@ function App() {
 
             <div className={"Send"}>
                 <div className="endpoint">
-                    <span className="methodName">{addr} {selectMethod} </span>
-                    <button onClick={sendHttp}> Send</button>
+                    <div className="addr">{addr} </div>
+                    <div className="methodName"> {selectMethod} </div>
+                    <button className="send" onClick={sendHttp}> Send</button>
                 </div>
                 <div className="payload">
                     <JsonView initialDoc={payload}/>
@@ -99,7 +113,13 @@ function App() {
 
             <div className={"Right"}>
                 <div>
-                    {respBody}
+                    <div>
+                        {respCode}
+                    </div>
+
+                    <div>
+                        {respBody}
+                    </div>
                 </div>
             </div>
         </div>
