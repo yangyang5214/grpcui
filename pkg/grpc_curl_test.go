@@ -2,6 +2,8 @@ package pkg
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -11,7 +13,7 @@ var ctx context.Context
 func init() {
 	ctx = context.TODO()
 	var err error
-	gcurl, err = NewGrpcCurl(ctx, "10.0.81.250:9000")
+	gcurl, err = NewGrpcCurl(ctx, "10.0.81.250:15555")
 	if err != nil {
 		panic(err)
 	}
@@ -35,11 +37,22 @@ func TestListMethods(t *testing.T) {
 }
 
 func TestMethodPayload(t *testing.T) {
-	methodName := "tophant.parser.api.TaskResultService.List"
+	methodName := "tophant.sensitive_info.api.SensitiveInfoService.List"
 	method, err := gcurl.GetMethodDescByName(methodName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	payload := gcurl.genPayload(method)
-	t.Log(payload)
+
+	// Marshal the map into a JSON-formatted string
+	formattedJSON, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		fmt.Println("Error formatting JSON:", err)
+		return
+	}
+	t.Logf("\n%s\n", formattedJSON)
+}
+
+func TestLoopUpHost(t *testing.T) {
+
 }

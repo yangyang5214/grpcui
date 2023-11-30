@@ -2,12 +2,10 @@ package pkg
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"sort"
 	"strings"
@@ -83,16 +81,12 @@ func (g *GrpcCurl) GetMethodDescByName(methodName string) (*desc.MethodDescripto
 	return r, nil
 }
 
-func (g *GrpcCurl) genPayload(method *desc.MethodDescriptor) string {
+func (g *GrpcCurl) genPayload(method *desc.MethodDescriptor) map[string]any {
 	payload := make(map[string]any)
 	for _, field := range method.GetInputType().GetFields() {
 		payload[field.GetName()] = DefaultFieldValue(field)
 	}
-	bytes, err := json.Marshal(&payload)
-	if err != nil {
-		log.Errorf("json.Marshal error: %v", err)
-	}
-	return string(bytes)
+	return payload
 }
 
 func (g *GrpcCurl) ListServices() ([]string, error) {

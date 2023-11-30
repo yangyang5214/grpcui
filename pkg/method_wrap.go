@@ -21,6 +21,7 @@ type AllMethod struct {
 }
 
 func DefaultFieldValue(field *desc.FieldDescriptor) any {
+	//special field
 	name := field.GetName()
 	switch name {
 	case "page":
@@ -28,7 +29,34 @@ func DefaultFieldValue(field *desc.FieldDescriptor) any {
 	case "page_size", "size":
 		return 10
 	}
-	return field.GetDefaultValue()
+
+	//default value by label
+	v := GetFileValueByType(field)
+	if v == nil {
+		v = field.GetDefaultValue()
+	}
+	label := field.GetLabel()
+	switch label {
+	case descriptorpb.FieldDescriptorProto_LABEL_REPEATED:
+		return []any{v}
+	}
+	return v
+}
+
+func GetFileValueByType(field *desc.FieldDescriptor) any {
+	fieldType := field.GetType()
+	switch fieldType {
+	case descriptorpb.FieldDescriptorProto_TYPE_STRING:
+		return ""
+	case descriptorpb.FieldDescriptorProto_TYPE_MESSAGE:
+		r := make(map[string]any)
+		for _, fieldDescriptor := range field.GetMessageType().GetFields() {
+			r[fieldDescriptor.GetName()] = DefaultFieldValue(fieldDescriptor)
+		}
+		return r
+	}
+	//todo add more type
+	return nil
 }
 
 func JsonToMessage(jsonData map[string]any, message *dynamic.Message) error {
