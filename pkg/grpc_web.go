@@ -39,8 +39,8 @@ func (s *GrpcWeb) ListServices(writer http.ResponseWriter, request *http.Request
 }
 
 type SendRequest struct {
-	Payload string `json:"payload,omitempty"`
-	Method  string `json:"method,omitempty"`
+	Payload map[string]any `json:"payload,omitempty"`
+	Method  string         `json:"method,omitempty"`
 }
 
 func (s *GrpcWeb) Send(writer http.ResponseWriter, request *http.Request) {
@@ -71,18 +71,15 @@ func (s *GrpcWeb) Send(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	jsonData := make(map[string]any)
-	err = json.Unmarshal([]byte(payload), &jsonData)
 	dMsg := dynamic.NewMessage(md.GetInputType())
-	err = JsonToMessage(jsonData, dMsg)
+	err = JsonToMessage(payload, dMsg)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	resp, err := s.client.send(request.Context(), md, dMsg)
 	if err != nil {
-		http.Error(writer, "send rpc error: "+err.Error(), http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	_, err = writer.Write([]byte(resp))

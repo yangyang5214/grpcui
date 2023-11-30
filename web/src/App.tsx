@@ -44,6 +44,7 @@ function App() {
         // Handle the click event for the method
         console.log(`Method clicked: ${method}`);
         setSelectMethod(method)
+        setRespBody("") // clear
         console.log(`selectMethod is: `, selectMethod)
         await getPayload()
     };
