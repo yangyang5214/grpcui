@@ -48,12 +48,13 @@ function App() {
     const handleMethodClick = async (method: string) => {
         // Handle the click event for the method
         console.log(`Method clicked: ${method}`);
-        setSelectMethod(method)
 
         clear()
 
-        console.log(`selectMethod is: `, selectMethod)
-        await getPayload()
+        console.log(`selectMethod is: `, method)
+
+        await getPayload(method)
+        setSelectMethod(method)
     };
 
     async function sendHttp() {
@@ -69,11 +70,8 @@ function App() {
     }
 
 
-    async function getPayload() {
-        if ("" === selectMethod) {
-            return
-        }
-        const resp = await GetPayload(selectMethod)
+    async function getPayload(method: string) {
+        const resp = await GetPayload(method)
         setPayload(resp.data.payload)
         console.log(`payload is`, payload)
     }
