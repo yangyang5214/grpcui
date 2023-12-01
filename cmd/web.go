@@ -51,6 +51,10 @@ var webCmd = &cobra.Command{
 			Addr:    ":8548",
 			Handler: allowCORS(r),
 		}
+		err = pkg.OpenBrowser("http://127.0.0.1:8548")
+		if err != nil {
+			log.Errorf("open browser error: %v", err)
+		}
 
 		err = server.ListenAndServe()
 		if err != nil {
