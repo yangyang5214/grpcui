@@ -58,6 +58,10 @@ function App() {
     };
 
     async function sendHttp() {
+        if (selectMethod === "") {
+            alert("Need select method")
+            return
+        }
         clear()
         await Send(selectMethod, payload).then(resp => {
             setRespBody(resp.data)
