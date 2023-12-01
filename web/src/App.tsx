@@ -111,12 +111,12 @@ function App() {
 
             <div className={"Right"}>
                 <div>
-                    <div>
+                    <div className={"statusCode"}>
                         {respCode}
                     </div>
 
                     <div>
-                        {respBody}
+                        {respBody !== "" && <JsonView initialDoc={respBody}/>}
                     </div>
                 </div>
             </div>
