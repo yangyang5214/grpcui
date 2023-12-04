@@ -22,8 +22,10 @@ function App() {
     const [respBody, setRespBody] = useState<string>("");
     const [respCode, setRespCode] = useState<String>("");
 
+    const [visibleApis, setVisibleApis] = useState<Array<String>>([]);
 
     useEffect(() => {
+        console.log(`useEffect method call...`)
         // Fetch initial data when the component mounts
         const fetchInitialData = async () => {
             try {
@@ -82,10 +84,8 @@ function App() {
     async function getPayload(method: string) {
         const resp = await GetPayload(method)
         setPayload(resp.data.payload)
-        console.log(`payload is`, payload)
     }
 
-    const [visibleApis, setVisibleApis] = useState<Array<String>>([]);
 
     function handleApiClick(service: string) {
         if (visibleApis.includes(service)) {
@@ -98,8 +98,10 @@ function App() {
     }
 
     const apiItems = apis?.map(api => (
-        <div key={api.service} className="api-container" onClick={() => handleApiClick(api.service)}>
-            {api.service}
+        <div>
+            <div key={api.service} className="api-container" onClick={() => handleApiClick(api.service)}>
+                {api.service}
+            </div>
             <div className={`method-container ${visibleApis.includes(api.service) ? '' : 'hide-display'}`}>
                 {api.methods.map(method => {
                     const parts = method.split('.');
@@ -141,7 +143,8 @@ function App() {
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 }
 
 export default App;
