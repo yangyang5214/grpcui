@@ -85,13 +85,19 @@ div {
 
 
 .api-container {
-
+    margin: 10px;
+    text-align: left;
 }
 
 .method-container {
     margin-left: 20px;
     padding: 10px;
 }
+
+.hide-display {
+    display: none
+}
+
 
 .method {
     padding: 5px;

@@ -68,6 +68,11 @@ function App() {
             setRespCode(resp.status + " " + resp.statusText)
         }).catch(err => {
             let resp = err.response
+            if (resp === undefined) {
+                alert("server internal error")
+                return
+            }
+            console.log(resp)
             setRespBody(resp.data)
             setRespCode(resp.status + " " + resp.statusText)
         })
@@ -80,11 +85,22 @@ function App() {
         console.log(`payload is`, payload)
     }
 
+    const [visibleApis, setVisibleApis] = useState<Array<String>>([]);
+
+    function handleApiClick(service: string) {
+        if (visibleApis.includes(service)) {
+            // If it is, remove it
+            setVisibleApis((prevArray) => prevArray.filter((existingItem) => existingItem !== service));
+        } else {
+            // If it's not, append it
+            setVisibleApis((prevArray) => [...prevArray, service]);
+        }
+    }
 
     const apiItems = apis?.map(api => (
-        <div key={api.service} className="api-container">
+        <div key={api.service} className="api-container" onClick={() => handleApiClick(api.service)}>
             {api.service}
-            <div className="method-container">
+            <div className={`method-container ${visibleApis.includes(api.service) ? '' : 'hide-display'}`}>
                 {api.methods.map(method => {
                     const parts = method.split('.');
                     const methodName = parts[parts.length - 1];
