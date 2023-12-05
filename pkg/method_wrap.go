@@ -91,7 +91,7 @@ func TransFormField(fd *desc.FieldDescriptor, key string, val any) any {
 		descriptorpb.FieldDescriptorProto_TYPE_INT32,
 		descriptorpb.FieldDescriptorProto_TYPE_SINT32,
 		descriptorpb.FieldDescriptorProto_TYPE_ENUM:
-		return int32(v.Int())
+		return anyToInt32(val)
 
 	case descriptorpb.FieldDescriptorProto_TYPE_SFIXED64,
 		descriptorpb.FieldDescriptorProto_TYPE_INT64,
